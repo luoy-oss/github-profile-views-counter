@@ -1,5 +1,7 @@
 # GitHub 个人主页访问量统计
 
+[English Version](README_EN.md) | [中文版本](README.md)
+
 一个可以部署在 Vercel 上的 GitHub 个人主页访问量统计服务，使用 MongoDB 存储数据。
 
 ## 功能特性
