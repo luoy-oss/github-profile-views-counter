@@ -1,0 +1,19 @@
+{
+  "name": "github-profile-views-counter",
+  "version": "1.0.0",
+  "description": "GitHub 个人主页访问量统计服务",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node server.js",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  },
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
