@@ -8,7 +8,7 @@ const { verifyGitHubUser } = require('../lib/github');
  * IP 访问时间窗口（小时）
  * 同一 IP 在此时间内访问同一用户不重复计数
  */
-const IP_ACCESS_WINDOW_HOURS = parseInt(process.env.IP_ACCESS_WINDOW_HOURS || '24', 10);
+const IP_ACCESS_WINDOW_HOURS = parseInt(process.env.IP_ACCESS_WINDOW_HOURS || '0', 10);
 
 /**
  * 获取当前计数（不增加）
@@ -87,21 +87,29 @@ module.exports = async (req, res) => {
     }
 
     const clientIP = getClientIP(req);
-
-    const { isFirstVisit } = await checkIPAccess(
-      clientIP, 
-      sanitizedUsername, 
-      IP_ACCESS_WINDOW_HOURS
-    );
-
     const collection = await getCounterCollection();
     
     let count;
-    if (isFirstVisit) {
+    let isFirstVisit = true;
+    
+    // 当 IP_ACCESS_WINDOW_HOURS 为 0 时，跳过 IP 判断，直接增加计数
+    if (IP_ACCESS_WINDOW_HOURS === 0) {
       count = await incrementCount(collection, sanitizedUsername);
-      await recordIPAccess(clientIP, sanitizedUsername);
     } else {
-      count = await getCurrentCount(collection, sanitizedUsername);
+      const { isFirstVisit: ipCheckResult } = await checkIPAccess(
+        clientIP, 
+        sanitizedUsername, 
+        IP_ACCESS_WINDOW_HOURS
+      );
+      
+      isFirstVisit = ipCheckResult;
+      
+      if (isFirstVisit) {
+        count = await incrementCount(collection, sanitizedUsername);
+        await recordIPAccess(clientIP, sanitizedUsername);
+      } else {
+        count = await getCurrentCount(collection, sanitizedUsername);
+      }
     }
 
     const svg = generateCountSVG(count, {
